@@ -6,6 +6,10 @@ const modal = new bootstrap.Modal("#modal", {});
 
 const headingModal = document.querySelector("#staticBackdropLabel");
 const modalBody = document.querySelector(".modal-body");
+const modalFooter = document.querySelector(".modal-footer");
+
+const toast = document.querySelector("#toast");
+const toastBody = document.querySelector(".toast-body");
 
 initEvents();
 
@@ -153,8 +157,66 @@ function generarModalHTML(receta) {
     card.appendChild(ingredientList);
 
     modalBody.appendChild(card);
+
+    // Botones de cerrar y abrir
+
+    limpiarHTML(modalFooter);
+
+    const btnFavorito = document.createElement("button");
+    btnFavorito.classList.add("btn", "btn-danger", "col");
+    btnFavorito.textContent = existeStorage(idMeal)
+        ? "Eliminar favorito"
+        : "Guardar Favoritos";
+    btnFavorito.onclick = function () {
+        if (existeStorage(idMeal)) {
+            eliminarFavorito(idMeal);
+            btnFavorito.textContent = "Guardar Favoritos";
+            mostrarToast("Eliminado correctamente");
+            return;
+        }
+
+        agregarFavorito({
+            id: idMeal,
+            titulo: strMeal,
+            img: strMealThumb,
+        });
+        mostrarToast("Agregado correctamente");
+        btnFavorito.textContent = "Eliminar Favorito";
+    };
+
+    const btnCerrarModal = document.createElement("button");
+    btnCerrarModal.classList.add("btn", "btn-secondary", "col");
+    btnCerrarModal.textContent = "Cerrar";
+    btnCerrarModal.onclick = function () {
+        modal.hide();
+    };
+
+    modalFooter.appendChild(btnFavorito);
+    modalFooter.appendChild(btnCerrarModal);
+
     // Muestra el modal
     modal.show();
+}
+
+function mostrarToast(mensaje) {
+    const toastModal = new bootstrap.Toast(toast);
+    toastBody.textContent = mensaje;
+    toastModal.show();
+}
+function eliminarFavorito(id) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    const newFavoritos = favoritos.filter((favorito) => favorito.id !== id);
+    localStorage.setItem("favoritos", JSON.stringify(newFavoritos));
+}
+
+function agregarFavorito(platillo) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    localStorage.setItem("favoritos", JSON.stringify([...favoritos, platillo]));
+}
+
+function existeStorage(id) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    return favoritos.some((favorito) => favorito.id === id);
 }
 
 function limpiarHTML(selector) {
