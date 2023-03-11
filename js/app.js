@@ -75,7 +75,7 @@ function generarPlatilloHTML(platillos) {
         heading.textContent = strMeal;
 
         const button = document.createElement("button");
-        button.classList.add("btn", "btn-primary", "w-100");
+        button.classList.add("btn", "btn-danger", "w-100");
         button.textContent = "Ver receta";
         button.onclick = function () {
             seleccionarReceta(idMeal);
@@ -240,7 +240,7 @@ function favoritosUpdate(favoritos) {
             <img class="card-img-top" src="${strMealThumb}" alt="${strMeal}"></img> 
             <div class="card-body">
                 <h5 class="card-title mb-3">${strMeal}</h5>
-                <button class="btn btn-primary w-100">Ver Receta</button>
+                <button class="btn btn-danger w-100">Ver Receta</button>
             </div>
         </div>
         `;
