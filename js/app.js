@@ -1,5 +1,6 @@
 const selectCategorias = document.querySelector("#categorias");
 const resultado = document.querySelector("#resultado");
+const resultadoFavoritos = document.querySelector(".favoritos");
 
 // new bootstrap.Modal(id del componente existente en HTML, parametros opcionales de config);
 const modal = new bootstrap.Modal("#modal", {});
@@ -15,7 +16,17 @@ initEvents();
 
 function initEvents() {
     document.addEventListener("DOMContentLoaded", iniciarApp);
-    selectCategorias.addEventListener("change", seleccionarCategoria);
+    if (selectCategorias) {
+        selectCategorias.addEventListener("change", seleccionarCategoria);
+    }
+    if (resultadoFavoritos) {
+        generarFavoritoStorageHTML();
+    }
+}
+
+function generarFavoritoStorageHTML() {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    generarPlatilloHTML(favoritos);
 }
 
 function seleccionarCategoria(e) {
@@ -32,7 +43,12 @@ function generarPlatilloHTML(platillos) {
     limpiarHTML(resultado);
     const h2 = document.createElement("h2");
     h2.classList.add("text-center");
-    h2.textContent = "Resultados";
+    if (resultadoFavoritos) {
+        h2.textContent = "";
+    } else {
+        h2.textContent = "Resultados";
+    }
+
     resultado.appendChild(h2);
 
     platillos.forEach((platillo) => {
@@ -176,9 +192,9 @@ function generarModalHTML(receta) {
         }
 
         agregarFavorito({
-            id: idMeal,
-            titulo: strMeal,
-            img: strMealThumb,
+            idMeal,
+            strMeal,
+            strMealThumb,
         });
         mostrarToast("Agregado correctamente");
         btnFavorito.textContent = "Eliminar Favorito";
@@ -205,10 +221,32 @@ function mostrarToast(mensaje) {
 }
 function eliminarFavorito(id) {
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
-    const newFavoritos = favoritos.filter((favorito) => favorito.id !== id);
+    const newFavoritos = favoritos.filter((favorito) => favorito.idMeal !== id);
+    if (resultadoFavoritos) {
+        favoritosUpdate(newFavoritos);
+    }
     localStorage.setItem("favoritos", JSON.stringify(newFavoritos));
 }
 
+function favoritosUpdate(favoritos) {
+    limpiarHTML(resultado);
+    favoritos.forEach((favorito) => {
+        const { idMeal, strMeal, strMealThumb } = favorito;
+        // resultado
+        const columna = document.createElement("div");
+        columna.classList.add("col-md-4");
+        columna.innerHTML = `
+        <div class="card mt-4">
+            <img class="card-img-top" src="${strMealThumb}" alt="${strMeal}"></img> 
+            <div class="card-body">
+                <h5 class="card-title mb-3">${strMeal}</h5>
+                <button class="btn btn-primary w-100">Ver Receta</button>
+            </div>
+        </div>
+        `;
+        resultado.appendChild(columna);
+    });
+}
 function agregarFavorito(platillo) {
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
     localStorage.setItem("favoritos", JSON.stringify([...favoritos, platillo]));
@@ -216,7 +254,7 @@ function agregarFavorito(platillo) {
 
 function existeStorage(id) {
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
-    return favoritos.some((favorito) => favorito.id === id);
+    return favoritos.some((favorito) => favorito.idMeal === id);
 }
 
 function limpiarHTML(selector) {
@@ -226,7 +264,9 @@ function limpiarHTML(selector) {
 }
 
 function iniciarApp() {
-    obtenerCategorias();
+    if (selectCategorias) {
+        obtenerCategorias();
+    }
 }
 
 function obtenerCategorias() {
@@ -251,6 +291,7 @@ function mostrarCategorias(arrayCategoria = []) {
         const option = document.createElement("option");
         option.value = strCategory;
         option.textContent = strCategory;
+
         selectCategorias.appendChild(option);
     });
 }
