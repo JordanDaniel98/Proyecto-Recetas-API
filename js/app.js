@@ -30,8 +30,8 @@ function generarFavoritoStorageHTML() {
 }
 
 function seleccionarCategoria(e) {
-    plato = e.target.value;
-    url = `https://www.themealdb.com/api/json/v1/1/filter.php?c=${plato}`;
+    const plato = e.target.value;
+    const url = `https://www.themealdb.com/api/json/v1/1/filter.php?c=${plato}`;
     fetch(url)
         .then((respuesta) => respuesta.json())
         .then((datos) => {
